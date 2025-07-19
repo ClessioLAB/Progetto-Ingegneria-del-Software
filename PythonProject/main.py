@@ -960,6 +960,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btnTerreni.clicked.connect(lambda: self.mainFrame.setCurrentIndex(2))
         self.btnMansioni.clicked.connect(lambda: self.mainFrame.setCurrentIndex(0))
         self.btnTerreni.clicked.connect(self.caricamento_terreni)
+        self.btnTerreni.clicked.connect(self.irrigazione_terreni)
         self.comboTerreni.currentIndexChanged.connect(self.irrigazione_terreni)
         self.btnIrriga.clicked.connect(self.irriga_campo)
         self.btnSemina.clicked.connect(self.semina_terreno)
@@ -1069,7 +1070,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         coltura = self.cmbProdImm.currentText()
         cursor.execute("SELECT id FROM prodotto WHERE nome = %s", (coltura,))
         prodotto_row = cursor.fetchone()
-        conn.close()
 
         id_prodotto = prodotto_row[0]
         id_magazzino = int(self.cmbMagazzImm.currentText())
@@ -1280,6 +1280,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.lblDataRaccolta.setText(result[0].strftime("%Y-%m-%d"))
             self.btnRaccolta.setEnabled(False)
+            self.btnSemina.setEnabled(True)
         conn.close()
 
     def semina_terreno(self):
@@ -1303,14 +1304,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.btnSemina.setEnabled(True)
         else:
             self.lblDataSeminazione.setText(result[0].strftime("%Y-%m-%d"))
+            self.lblDataRaccolta.setText("Nessuna data di raccolta")
             self.btnSemina.setEnabled(False)
-            self.btnSemina.setEnabled(True)
+            self.btnRaccolta.setEnabled(True)
         cursor.execute(
             "SELECT c.nome FROM coltiva co JOIN coltura c ON co.id_coltura = c.id WHERE co.id_terreno = %s ORDER BY co.id DESC LIMIT 1",
             (id_terreno,))
         result = cursor.fetchone()
         if result is None or result[0] is None:
-            self.lblColturaAss.setText("Nessuna coltura assegnata")
+            self.lblColturaAss.setText("Nessuna data di raccolta")
         else:
             self.lblColturaAss.setText(result[0])
         conn.close()
@@ -1371,6 +1373,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.lblDataRaccolta.setText(result[0].strftime("%Y-%m-%d"))
             self.btnRaccolta.setEnabled(False)
+            self.btnSemina.setEnabled(True)
+
         cursor.execute("SELECT c.nome FROM coltiva co JOIN coltura c ON co.id_coltura = c.id WHERE co.id_terreno = %s ORDER BY co.id DESC LIMIT 1", (id,))
         result = cursor.fetchone()
         if result is None or result[0] is None:
